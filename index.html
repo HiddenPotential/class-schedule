@@ -3,18 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Schedule Styling App</title>
+    <title>Printable Schedule Maker - Create Beautiful Class Schedules in Minutes</title>
+    <meta name="description" content="Create a beautiful, printable schedule in minutes. Stop wrestling with boring spreadsheets. Instantly create personalized class schedules ready to print with custom colors, fonts, and background images with transparency controls.">
+    <meta name="keywords" content="printable schedule, class schedule maker, schedule generator, PDF schedule, student planner, timetable creator, schedule template">
+    <meta name="author" content="Printable Schedule Maker">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Printable Schedule Maker - Create Beautiful Class Schedules in Minutes">
+    <meta property="og:description" content="Your schedule, styled in seconds. Create beautiful, personalized class schedules with custom colors, fonts, and background images that are ready to print with just a few clicks.">
+    <meta property="og:site_name" content="Printable Schedule Maker">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Printable Schedule Maker - Create Beautiful Class Schedules in Minutes">
+    <meta property="twitter:description" content="Your schedule, styled in seconds. Create beautiful, personalized class schedules with custom colors, fonts, and background images that are ready to print with just a few clicks.">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="theme-color" content="#2c3e50">
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232c3e50'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3E📅%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%232c3e50' rx='20'/%3E%3Ctext x='90' y='110' font-family='Arial' font-size='70' fill='white' text-anchor='middle'%3E📅%3C/text%3E%3C/svg%3E">
+    
+    <!-- Mobile App Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Schedule Maker">
+    
+    <!-- Additional Branding Meta Tags -->
+    <meta name="application-name" content="Printable Schedule Maker">
+    <meta name="msapplication-TileColor" content="#2c3e50">
+    <meta name="msapplication-config" content="none">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600&family=Lato:wght@400;700&family=Montserrat:wght@400;600&family=Poppins:wght@400;500;600&family=Source+Sans+Pro:wght@400;600&family=Nunito:wght@400;600&family=Raleway:wght@400;500&family=Ubuntu:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Printable Schedule Maker",
+        "description": "Create a beautiful, printable schedule in minutes. Stop wrestling with boring spreadsheets. Instantly create personalized class schedules ready to print with custom colors, fonts, and background images with transparency controls.",
+        "url": "https://printableschedulemaker.com",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Customizable color themes",
+            "Multiple font options",
+            "PDF export functionality",
+            "Drag and drop interface",
+            "Background image support",
+            "Transparency controls",
+            "Printable single-page format"
+        ],
+        "creator": {
+            "@type": "Organization",
+            "name": "Printable Schedule Maker"
+        }
+    }
+    </script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+    <!-- Product Header -->
+    <header class="product-header">
+        <div class="product-info">
+            <h1 class="product-name">Printable Schedule Maker</h1>
+            <p class="product-slogan">Create a beautiful, printable schedule in minutes.</p>
+            <p class="product-description">Your schedule, styled in seconds. Stop wrestling with boring spreadsheets. With this tool, you can instantly create a beautiful, personalized class schedule that's ready to print. Just click to type, pick your favorite colors and fonts, customize background images with transparency controls, and download a perfect, single-page PDF to slide right into your folder.</p>
+        </div>
+    </header>
+    
     <div class="app-container">
         <!-- Control Panel (Left Sidebar) -->
-        <div class="control-panel">
+        <aside class="control-panel" role="complementary" aria-label="Schedule customization controls">
             <h2>Customize</h2>
             
             <!-- Download PDF Button -->
@@ -99,10 +174,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
         
         <!-- Main Canvas Area -->
-        <div class="canvas-container">
+        <main class="canvas-container" role="main" aria-label="Schedule editor">
             <div id="schedule-canvas" class="schedule-canvas">
                 <div class="canvas-background"></div>
                 <h1 class="schedule-title" contenteditable="true" id="schedule-title">Class Schedule</h1>
@@ -201,7 +276,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </main>
     </div>
     
     <script src="script.js"></script>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Schedule Styling App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Control Panel (Left Sidebar) -->
+        <div class="control-panel">
+            <h2>Customize</h2>
+            
+            <!-- Download PDF Button -->
+            <button id="download-pdf" class="download-btn">Download PDF</button>
+            
+            <!-- Themes Section -->
+            <div class="control-section">
+                <h3>Themes</h3>
+                <div class="theme-gallery">
+                    <div class="theme-option" data-theme="classic" style="background: linear-gradient(45deg, #ffffff, #f8f9fa);"></div>
+                    <div class="theme-option" data-theme="blue" style="background: linear-gradient(45deg, #e3f2fd, #bbdefb);"></div>
+                    <div class="theme-option" data-theme="green" style="background: linear-gradient(45deg, #e8f5e8, #c8e6c9);"></div>
+                    <div class="theme-option" data-theme="purple" style="background: linear-gradient(45deg, #f3e5f5, #e1bee7);"></div>
+                    <div class="theme-option" data-theme="orange" style="background: linear-gradient(45deg, #fff3e0, #ffcc80);"></div>
+                    <div class="theme-option" data-theme="dark" style="background: linear-gradient(45deg, #424242, #616161);"></div>
+                </div>
+            </div>
+            
+            <!-- Font Controls -->
+            <div class="control-section">
+                <h3>Font & Size</h3>
+                <select id="font-family">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Helvetica, sans-serif">Helvetica</option>
+                </select>
+                <select id="font-size">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+            
+            <!-- Background Upload -->
+            <div class="control-section">
+                <h3>Background</h3>
+                <input type="file" id="background-upload" accept="image/*" style="display: none;">
+                <button id="background-btn" class="upload-btn">Upload Background</button>
+                <button id="remove-background" class="remove-btn" style="display: none;">Remove Background</button>
+            </div>
+            
+            <!-- Table Structure Controls -->
+            <div class="control-section">
+                <h3>Table Structure</h3>
+                <div class="structure-controls">
+                    <div class="control-group">
+                        <label>Columns:</label>
+                        <button id="add-column" class="structure-btn">+ Add</button>
+                        <button id="remove-column" class="structure-btn remove">- Remove</button>
+                    </div>
+                    <div class="control-group">
+                        <label>Rows:</label>
+                        <button id="add-row" class="structure-btn">+ Add</button>
+                        <button id="remove-row" class="structure-btn remove">- Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Canvas Area -->
+        <div class="canvas-container">
+            <div id="schedule-canvas" class="schedule-canvas">
+                <div class="canvas-background"></div>
+                <table id="schedule-table" class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="time-column">Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-slot">8:00 AM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">9:00 AM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">10:00 AM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">11:00 AM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">12:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">1:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">2:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">3:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">4:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                        <tr>
+                            <td class="time-slot">5:00 PM</td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                            <td contenteditable="true" class="class-cell" data-placeholder="Click to add class"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

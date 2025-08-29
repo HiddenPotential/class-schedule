@@ -561,9 +561,21 @@ class ScheduleApp {
         // Map web fonts to PDF-compatible fonts
         const fontMap = {
             'Arial, sans-serif': 'helvetica',
+            "'Inter', sans-serif": 'helvetica',
+            "'Roboto', sans-serif": 'helvetica',
+            "'Open Sans', sans-serif": 'helvetica',
+            "'Lato', sans-serif": 'helvetica',
+            "'Montserrat', sans-serif": 'helvetica',
+            "'Poppins', sans-serif": 'helvetica',
+            "'Source Sans Pro', sans-serif": 'helvetica',
+            "'Nunito', sans-serif": 'helvetica',
+            "'Raleway', sans-serif": 'helvetica',
+            "'Ubuntu', sans-serif": 'helvetica',
             'Georgia, serif': 'times',
-            'Times New Roman, serif': 'times',
-            'Courier New, monospace': 'courier',
+            "'Times New Roman', serif": 'times',
+            "'Courier New', monospace": 'courier',
+            "'Comic Sans MS', cursive": 'helvetica',
+            'Helvetica, sans-serif': 'helvetica',
             'Verdana, sans-serif': 'helvetica',
             'Trebuchet MS, sans-serif': 'helvetica',
             'Impact, sans-serif': 'helvetica'

@@ -52,6 +52,11 @@ class ScheduleApp {
             this.removeBackground();
         });
         
+        // Custom color picker
+        document.getElementById('apply-custom-color').addEventListener('click', () => {
+            this.applyCustomColor();
+        });
+        
         // PDF download
         document.getElementById('download-pdf').addEventListener('click', () => {
             this.generatePDF();
@@ -97,8 +102,13 @@ class ScheduleApp {
             option.classList.remove('active');
         });
         
-        // Add active class to selected theme
-        document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
+        // Add active class to selected theme (skip for custom)
+        if (themeName !== 'custom') {
+            const themeElement = document.querySelector(`[data-theme="${themeName}"]`);
+            if (themeElement) {
+                themeElement.classList.add('active');
+            }
+        }
         
         // Apply theme to canvas, title, and table
         this.canvas.setAttribute('data-theme', themeName);
@@ -106,6 +116,12 @@ class ScheduleApp {
         const title = document.getElementById('schedule-title');
         if (title) {
             title.setAttribute('data-theme', themeName);
+        }
+        
+        // Apply custom color if it's a custom theme
+        if (themeName === 'custom' && this.customColor) {
+            document.documentElement.style.setProperty('--custom-text-color', this.customColor);
+            this.canvas.style.setProperty('--theme-color', this.customColor);
         }
         
         this.currentTheme = themeName;
@@ -145,6 +161,25 @@ class ScheduleApp {
         document.getElementById('background-upload').value = '';
     }
     
+    applyCustomColor() {
+        const colorPicker = document.getElementById('custom-color-picker');
+        const customColor = colorPicker.value;
+        
+        // Store the custom color
+        this.customColor = customColor;
+        
+        // Remove active class from all theme options
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        
+        // Apply custom color to schedule text
+        this.applyTheme('custom');
+        
+        // Show feedback message
+        this.showMessage('Custom color applied!', 'success');
+    }
+    
     handleCellFocus(event) {
         event.target.classList.remove('empty');
     }
@@ -174,7 +209,13 @@ class ScheduleApp {
             });
 
             // Get current theme and font settings
-            const currentTheme = document.querySelector('.theme-option.active').dataset.theme;
+            const activeThemeElement = document.querySelector('.theme-option.active');
+            let currentTheme = activeThemeElement ? activeThemeElement.dataset.theme : 'default';
+            
+            // Check if custom color is being used
+            if (this.customColor && !activeThemeElement) {
+                currentTheme = 'custom';
+            }
             const currentFont = document.getElementById('font-family').value;
             const fontSizeClass = document.getElementById('font-size').value;
             
@@ -193,6 +234,17 @@ class ScheduleApp {
                 author: 'Schedule App',
                 creator: 'Class Schedule Styling App'
             });
+
+            // Add background image if one is uploaded
+            if (this.backgroundImage) {
+                try {
+                    // Add background image to PDF
+                    // Scale image to fit Letter size (8.5 x 11 inches)
+                    doc.addImage(this.backgroundImage, 'JPEG', 0, 0, 8.5, 11);
+                } catch (error) {
+                    console.warn('Failed to add background image to PDF:', error);
+                }
+            }
 
             // Add title from the editable title element
             const titleElement = document.getElementById('schedule-title');
@@ -548,13 +600,29 @@ class ScheduleApp {
     
     getThemeTextColor(theme) {
         const themeColors = {
+            'default': [44, 62, 80],
             'classic': [44, 62, 80],
             'modern': [52, 73, 94],
             'vibrant': [155, 89, 182],
             'nature': [39, 174, 96],
             'sunset': [230, 126, 34]
         };
+        
+        if (theme === 'custom' && this.customColor) {
+            return this.hexToRgb(this.customColor);
+        }
+        
         return themeColors[theme] || [44, 62, 80];
+    }
+    
+    hexToRgb(hex) {
+        // Convert hex color to RGB array
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+        ] : [44, 62, 80];
     }
     
     mapFontToPDF(fontFamily) {

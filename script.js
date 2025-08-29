@@ -100,8 +100,14 @@ class ScheduleApp {
         // Add active class to selected theme
         document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
         
-        // Apply theme to canvas
+        // Apply theme to canvas, title, and table
         this.canvas.setAttribute('data-theme', themeName);
+        this.table.setAttribute('data-theme', themeName);
+        const title = document.getElementById('schedule-title');
+        if (title) {
+            title.setAttribute('data-theme', themeName);
+        }
+        
         this.currentTheme = themeName;
     }
     
@@ -160,84 +166,150 @@ class ScheduleApp {
     
     generatePDF() {
         try {
-            // Create new jsPDF instance with Letter format
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'in',
                 format: 'letter'
             });
+
+            // Get current theme and font settings
+            const currentTheme = document.querySelector('.theme-option.active').dataset.theme;
+            const currentFont = document.getElementById('font-family').value;
+            const currentFontSize = parseInt(document.getElementById('font-size').value);
+
+            // Set document properties
+            doc.setProperties({
+                title: 'Class Schedule',
+                subject: 'Weekly Class Schedule',
+                author: 'Schedule App',
+                creator: 'Class Schedule Styling App'
+            });
+
+            // Add title from the editable title element
+            const titleElement = document.getElementById('schedule-title');
+            const titleText = titleElement ? titleElement.textContent.trim() : 'Class Schedule';
             
-            // Get table data
-            const tableData = this.extractTableData();
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
             
-            // Set up styling based on current theme and font
-            const styles = this.getPDFStyles();
-            
-            // Add background if exists
-            if (this.backgroundImage) {
-                try {
-                    doc.addImage(this.backgroundImage, 'JPEG', 0, 0, 8.5, 11, undefined, 'FAST');
-                } catch (e) {
-                    console.warn('Could not add background image to PDF:', e);
-                }
+            // Apply theme color to title in PDF
+            const titleColor = this.getThemeTextColor(currentTheme);
+            if (titleColor) {
+                doc.setTextColor(titleColor[0], titleColor[1], titleColor[2]);
             }
             
-            // Create the table using autoTable
+            doc.text(titleText, 4.25, 0.8, { align: 'center' });
+            
+            // Reset text color for table
+            doc.setTextColor(44, 62, 80);
+
+            // Prepare table data
+            const tableData = [];
+            const headers = [];
+            
+            // Get headers dynamically
+            const headerCells = this.table.querySelectorAll('thead th');
+            headerCells.forEach(cell => {
+                headers.push(cell.textContent.trim());
+            });
+
+            // Get body data dynamically
+            const bodyRows = this.table.querySelectorAll('tbody tr');
+            bodyRows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    rowData.push(cell.textContent.trim() || '');
+                });
+                tableData.push(rowData);
+            });
+
+            // Calculate optimal font size and column widths for PDF
+            const columnCount = headers.length;
+            const availableWidth = 7.5; // Letter width minus margins
+            const timeColumnWidth = 0.8;
+            const dayColumnWidth = (availableWidth - timeColumnWidth) / (columnCount - 1);
+            const pdfFontSize = Math.max(6, Math.min(12, currentFontSize * 0.8));
+
+            // Prepare column styles dynamically
+            const columnStyles = {
+                0: { 
+                    cellWidth: timeColumnWidth,
+                    fillColor: [236, 240, 241],
+                    fontStyle: 'bold'
+                }
+            };
+            
+            // Set width for day columns
+            for (let i = 1; i < columnCount; i++) {
+                columnStyles[i] = {
+                    cellWidth: dayColumnWidth
+                };
+            }
+
+            // Get theme text color for table content
+            const themeTextColor = this.getThemeTextColor(currentTheme);
+            
+            // Generate table with autoTable
             doc.autoTable({
-                head: [tableData.headers],
-                body: tableData.rows,
-                startY: 0.5,
-                margin: { top: 0.5, right: 0.5, bottom: 0.5, left: 0.5 },
-                tableWidth: 7.5,
+                head: [headers],
+                body: tableData,
+                startY: 1.2,
+                margin: { top: 1.2, right: 0.5, bottom: 0.5, left: 0.5 },
+                pageBreak: 'avoid',
+                tableWidth: 'auto',
                 styles: {
-                    fontSize: styles.fontSize,
-                    fontStyle: 'normal',
-                    textColor: styles.textColor,
-                    fillColor: styles.fillColor,
-                    lineColor: styles.lineColor,
+                    fontSize: pdfFontSize,
+                    cellPadding: 0.06,
+                    font: 'helvetica',
+                    textColor: themeTextColor,
+                    lineColor: [221, 221, 221],
                     lineWidth: 0.01,
-                    cellPadding: 0.05,
-                    font: 'helvetica'
+                    overflow: 'linebreak',
+                    cellWidth: 'wrap'
                 },
                 headStyles: {
-                    fillColor: styles.headerFillColor,
-                    textColor: styles.headerTextColor,
+                    fillColor: [248, 249, 250],
+                    textColor: themeTextColor,
                     fontStyle: 'bold',
-                    fontSize: styles.headerFontSize
+                    fontSize: pdfFontSize + 1
                 },
-                columnStyles: {
-                    0: { cellWidth: 0.9, halign: 'center' }, // Time column
-                    1: { cellWidth: 1.32, halign: 'center' }, // Monday
-                    2: { cellWidth: 1.32, halign: 'center' }, // Tuesday
-                    3: { cellWidth: 1.32, halign: 'center' }, // Wednesday
-                    4: { cellWidth: 1.32, halign: 'center' }, // Thursday
-                    5: { cellWidth: 1.32, halign: 'center' }  // Friday
-                },
+                columnStyles: columnStyles,
                 alternateRowStyles: {
-                    fillColor: styles.alternateRowColor
+                    fillColor: [252, 252, 252]
+                },
+                didDrawPage: function(data) {
+                    // Ensure content fits on single page
+                    if (data.pageNumber > 1) {
+                        console.warn('Content exceeds single page');
+                    }
                 },
                 didParseCell: function(data) {
-                    // Ensure text fits within cells
-                    if (data.cell.text && data.cell.text.length > 0) {
-                        const maxLength = data.column.index === 0 ? 8 : 15;
-                        if (data.cell.text[0].length > maxLength) {
-                            data.cell.text[0] = data.cell.text[0].substring(0, maxLength - 3) + '...';
-                        }
+                    // Adjust font size if table is too wide
+                    if (columnCount > 7 && data.cell.styles.fontSize > 8) {
+                        data.cell.styles.fontSize = 8;
                     }
+                    // Apply theme color to all cells
+                    data.cell.styles.textColor = themeTextColor;
                 }
             });
-            
+
+            // Apply theme colors if not default
+            if (currentTheme !== 'default') {
+                const themeColors = this.getThemeTextColor(currentTheme);
+                // Note: Advanced theming would require more complex jsPDF customization
+            }
+
             // Save the PDF
-            const fileName = `class-schedule-${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(fileName);
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            doc.save(`class-schedule-${timestamp}.pdf`);
             
-            // Show success message
-            this.showMessage('PDF downloaded successfully!', 'success');
+            this.showMessage('PDF generated successfully!', 'success');
             
         } catch (error) {
-            console.error('Error generating PDF:', error);
-            this.showMessage('Error generating PDF. Please try again.', 'error');
+            console.error('PDF generation failed:', error);
+            this.showMessage('Failed to generate PDF. Please try again.', 'error');
         }
     }
     
@@ -335,6 +407,7 @@ class ScheduleApp {
         
         // Add header cell
         const newHeader = document.createElement('th');
+        newHeader.contentEditable = 'true';
         newHeader.textContent = `Day ${headerRow.children.length}`;
         headerRow.appendChild(newHeader);
         
@@ -392,6 +465,7 @@ class ScheduleApp {
         // Add time slot cell
         const timeCell = document.createElement('td');
         timeCell.className = 'time-slot';
+        timeCell.contentEditable = 'true';
         timeCell.textContent = nextTime;
         newRow.appendChild(timeCell);
         
@@ -457,6 +531,17 @@ class ScheduleApp {
         
         // Update CSS custom property for dynamic width
         document.documentElement.style.setProperty('--day-column-width', `${dayColumnWidth}%`);
+    }
+    
+    getThemeTextColor(theme) {
+        const themeColors = {
+            'minimal': [44, 62, 80],
+            'dark': [44, 62, 80],
+            'blue': [52, 152, 219],
+            'green': [39, 174, 96],
+            'purple': [155, 89, 182]
+        };
+        return themeColors[theme] || [44, 62, 80];
     }
     
     showMessage(text, type = 'info') {

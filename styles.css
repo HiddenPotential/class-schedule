@@ -229,6 +229,11 @@ body {
     z-index: 1;
 }
 
+/* CSS Custom Properties */
+:root {
+    --day-column-width: 22%; /* Default for 4 day columns */
+}
+
 /* Schedule Table */
 .schedule-table {
     position: relative;
@@ -281,6 +286,7 @@ body {
     font-size: 13px;
     line-height: 1.3;
     min-width: 100px;
+    width: var(--day-column-width);
 }
 
 /* Dynamic column width calculation */
@@ -290,7 +296,7 @@ body {
 
 .schedule-table th:not(.time-column),
 .schedule-table td:not(.time-slot) {
-    width: auto;
+    width: var(--day-column-width);
 }
 
 .class-cell:hover {

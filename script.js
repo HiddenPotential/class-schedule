@@ -176,7 +176,15 @@ class ScheduleApp {
             // Get current theme and font settings
             const currentTheme = document.querySelector('.theme-option.active').dataset.theme;
             const currentFont = document.getElementById('font-family').value;
-            const currentFontSize = parseInt(document.getElementById('font-size').value);
+            const fontSizeClass = document.getElementById('font-size').value;
+            
+            // Map font size classes to actual pixel values to match editor
+            const fontSizeMap = {
+                'small': 11,
+                'medium': 13, 
+                'large': 15
+            };
+            const currentFontSize = fontSizeMap[fontSizeClass] || 13;
 
             // Set document properties
             doc.setProperties({
@@ -191,7 +199,7 @@ class ScheduleApp {
             const titleText = titleElement ? titleElement.textContent.trim() : 'Class Schedule';
             
             doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont(this.mapFontToPDF(currentFont), 'bold');
             
             // Apply theme color to title in PDF
             const titleColor = this.getThemeTextColor(currentTheme);
@@ -230,7 +238,11 @@ class ScheduleApp {
             const availableWidth = 7.5; // Letter width minus margins
             const timeColumnWidth = 0.8;
             const dayColumnWidth = (availableWidth - timeColumnWidth) / (columnCount - 1);
-            const pdfFontSize = Math.max(6, Math.min(12, currentFontSize * 0.8));
+            
+            // Use exact font sizes to match editor display
+            const pdfFontSize = Math.max(8, Math.min(14, currentFontSize * 0.75));
+            const headerFontSize = Math.max(9, Math.min(15, currentFontSize + 1));
+            const timeSlotFontSize = Math.max(7, Math.min(13, currentFontSize - 1));
 
             // Prepare column styles dynamically
             const columnStyles = {
@@ -241,7 +253,8 @@ class ScheduleApp {
                 }
             };
             
-            // Set width for day columns
+            // Set width for day columns and time column font size
+            columnStyles[0].fontSize = timeSlotFontSize;
             for (let i = 1; i < columnCount; i++) {
                 columnStyles[i] = {
                     cellWidth: dayColumnWidth
@@ -262,7 +275,7 @@ class ScheduleApp {
                 styles: {
                     fontSize: pdfFontSize,
                     cellPadding: 0.06,
-                    font: 'helvetica',
+                    font: this.mapFontToPDF(currentFont),
                     textColor: themeTextColor,
                     lineColor: [221, 221, 221],
                     lineWidth: 0.01,
@@ -273,7 +286,7 @@ class ScheduleApp {
                     fillColor: [248, 249, 250],
                     textColor: themeTextColor,
                     fontStyle: 'bold',
-                    fontSize: pdfFontSize + 1
+                    fontSize: headerFontSize
                 },
                 columnStyles: columnStyles,
                 alternateRowStyles: {
@@ -535,13 +548,27 @@ class ScheduleApp {
     
     getThemeTextColor(theme) {
         const themeColors = {
-            'minimal': [44, 62, 80],
-            'dark': [44, 62, 80],
-            'blue': [52, 152, 219],
-            'green': [39, 174, 96],
-            'purple': [155, 89, 182]
+            'classic': [44, 62, 80],
+            'modern': [52, 73, 94],
+            'vibrant': [155, 89, 182],
+            'nature': [39, 174, 96],
+            'sunset': [230, 126, 34]
         };
         return themeColors[theme] || [44, 62, 80];
+    }
+    
+    mapFontToPDF(fontFamily) {
+        // Map web fonts to PDF-compatible fonts
+        const fontMap = {
+            'Arial, sans-serif': 'helvetica',
+            'Georgia, serif': 'times',
+            'Times New Roman, serif': 'times',
+            'Courier New, monospace': 'courier',
+            'Verdana, sans-serif': 'helvetica',
+            'Trebuchet MS, sans-serif': 'helvetica',
+            'Impact, sans-serif': 'helvetica'
+        };
+        return fontMap[fontFamily] || 'helvetica';
     }
     
     showMessage(text, type = 'info') {

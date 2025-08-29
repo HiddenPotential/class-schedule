@@ -145,6 +145,53 @@ body {
     color: white;
 }
 
+/* Color Picker */
+.color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+#custom-color-picker {
+    width: 60px;
+    height: 40px;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+}
+
+#custom-color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+}
+
+#custom-color-picker::-webkit-color-swatch {
+    border: none;
+    border-radius: 4px;
+}
+
+.apply-color-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.apply-color-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
 /* Structure Controls */
 .structure-controls {
     display: flex;
@@ -439,6 +486,16 @@ body {
 }
 
 /* Theme styles - Text color only (matching PDF output) */
+.theme-default,
+.theme-default .schedule-title,
+.theme-default .schedule-table,
+.theme-default .schedule-table th,
+.theme-default .schedule-table td,
+.theme-default .class-cell,
+.theme-default .time-slot {
+    color: #2c3e50 !important;
+}
+
 .theme-classic,
 .theme-classic .schedule-title,
 .theme-classic .schedule-table,
@@ -487,6 +544,87 @@ body {
 .theme-sunset .class-cell,
 .theme-sunset .time-slot {
     color: #e67e22 !important;
+}
+
+.theme-custom,
+.theme-custom .schedule-title,
+.theme-custom .schedule-table,
+.theme-custom .schedule-table th,
+.theme-custom .schedule-table td,
+.theme-custom .class-cell,
+.theme-custom .time-slot {
+    color: var(--custom-text-color, #2c3e50) !important;
+}
+
+/* Theme colors using data-theme attribute */
+[data-theme="default"],
+[data-theme="default"] .schedule-title,
+[data-theme="default"] .schedule-table,
+[data-theme="default"] .schedule-table th,
+[data-theme="default"] .schedule-table td,
+[data-theme="default"] .class-cell,
+[data-theme="default"] .time-slot {
+    color: #2c3e50 !important;
+}
+
+[data-theme="classic"],
+[data-theme="classic"] .schedule-title,
+[data-theme="classic"] .schedule-table,
+[data-theme="classic"] .schedule-table th,
+[data-theme="classic"] .schedule-table td,
+[data-theme="classic"] .class-cell,
+[data-theme="classic"] .time-slot {
+    color: #2c3e50 !important;
+}
+
+[data-theme="modern"],
+[data-theme="modern"] .schedule-title,
+[data-theme="modern"] .schedule-table,
+[data-theme="modern"] .schedule-table th,
+[data-theme="modern"] .schedule-table td,
+[data-theme="modern"] .class-cell,
+[data-theme="modern"] .time-slot {
+    color: #34495e !important;
+}
+
+[data-theme="vibrant"],
+[data-theme="vibrant"] .schedule-title,
+[data-theme="vibrant"] .schedule-table,
+[data-theme="vibrant"] .schedule-table th,
+[data-theme="vibrant"] .schedule-table td,
+[data-theme="vibrant"] .class-cell,
+[data-theme="vibrant"] .time-slot {
+    color: #9b59b6 !important;
+}
+
+[data-theme="nature"],
+[data-theme="nature"] .schedule-title,
+[data-theme="nature"] .schedule-table,
+[data-theme="nature"] .schedule-table th,
+[data-theme="nature"] .schedule-table td,
+[data-theme="nature"] .class-cell,
+[data-theme="nature"] .time-slot {
+    color: #27ae60 !important;
+}
+
+[data-theme="sunset"],
+[data-theme="sunset"] .schedule-title,
+[data-theme="sunset"] .schedule-table,
+[data-theme="sunset"] .schedule-table th,
+[data-theme="sunset"] .schedule-table td,
+[data-theme="sunset"] .class-cell,
+[data-theme="sunset"] .time-slot {
+    color: #e67e22 !important;
+}
+
+[data-theme="custom"],
+[data-theme="custom"] .schedule-title,
+[data-theme="custom"] .schedule-table,
+[data-theme="custom"] .schedule-table th,
+[data-theme="custom"] .schedule-table td,
+[data-theme="custom"] .class-cell,
+[data-theme="custom"] .time-slot {
+    color: var(--custom-text-color, #2c3e50) !important;
 }
 
 /* Responsive Design */

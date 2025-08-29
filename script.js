@@ -52,6 +52,11 @@ class ScheduleApp {
             this.removeBackground();
         });
         
+        // Background opacity control
+        document.getElementById('background-opacity').addEventListener('input', (e) => {
+            this.updateBackgroundOpacity(e.target.value);
+        });
+        
         // Custom color picker
         document.getElementById('apply-custom-color').addEventListener('click', () => {
             this.applyCustomColor();
@@ -148,7 +153,11 @@ class ScheduleApp {
             reader.onload = (e) => {
                 this.backgroundImage = e.target.result;
                 this.canvasBackground.style.backgroundImage = `url(${this.backgroundImage})`;
+                // Set initial opacity from slider value
+                const opacityValue = document.getElementById('background-opacity').value;
+                this.canvasBackground.style.opacity = opacityValue / 100;
                 document.getElementById('remove-background').style.display = 'block';
+                document.getElementById('transparency-control').style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
@@ -157,8 +166,16 @@ class ScheduleApp {
     removeBackground() {
         this.backgroundImage = null;
         this.canvasBackground.style.backgroundImage = 'none';
+        this.canvasBackground.style.opacity = 0.1; // Reset to default
         document.getElementById('remove-background').style.display = 'none';
+        document.getElementById('transparency-control').style.display = 'none';
         document.getElementById('background-upload').value = '';
+    }
+    
+    updateBackgroundOpacity(value) {
+        const opacity = value / 100;
+        this.canvasBackground.style.opacity = opacity;
+        document.getElementById('opacity-value').textContent = `${value}%`;
     }
     
     applyCustomColor() {
@@ -238,9 +255,19 @@ class ScheduleApp {
             // Add background image if one is uploaded
             if (this.backgroundImage) {
                 try {
+                    // Get current opacity setting from slider
+                    const opacitySlider = document.getElementById('background-opacity');
+                    const opacity = opacitySlider ? opacitySlider.value / 100 : 0.1;
+                    
+                    // Set opacity for background image
+                    doc.setGState(new doc.GState({opacity: opacity}));
+                    
                     // Add background image to PDF
                     // Scale image to fit Letter size (8.5 x 11 inches)
                     doc.addImage(this.backgroundImage, 'JPEG', 0, 0, 8.5, 11);
+                    
+                    // Reset opacity to full for other elements
+                    doc.setGState(new doc.GState({opacity: 1}));
                 } catch (error) {
                     console.warn('Failed to add background image to PDF:', error);
                 }

@@ -76,6 +76,11 @@
                 <input type="file" id="background-upload" accept="image/*" style="display: none;">
                 <button id="background-btn" class="upload-btn">Upload Background</button>
                 <button id="remove-background" class="remove-btn" style="display: none;">Remove Background</button>
+                <div class="transparency-control" id="transparency-control" style="display: none;">
+                    <label for="background-opacity">Transparency:</label>
+                    <input type="range" id="background-opacity" min="0" max="100" value="10" class="opacity-slider">
+                    <span id="opacity-value">10%</span>
+                </div>
             </div>
             
             <!-- Table Structure Controls -->

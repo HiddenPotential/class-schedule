@@ -234,6 +234,34 @@ body {
     --day-column-width: 22%; /* Default for 4 day columns */
 }
 
+/* Schedule Title */
+.schedule-title {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    margin: 0 0 20px 0;
+    padding: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    border: 2px dashed transparent;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: text;
+}
+
+.schedule-title:hover {
+    border-color: #bdc3c7;
+    background-color: #f8f9fa;
+}
+
+.schedule-title:focus {
+    border-color: #3498db;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
 /* Schedule Table */
 .schedule-table {
     position: relative;
@@ -416,6 +444,57 @@ body {
 .schedule-canvas[data-theme] .schedule-table th,
 .schedule-canvas[data-theme] .schedule-table td {
     border-color: var(--border-color);
+}
+
+/* Theme styles - Text color only */
+.theme-minimal,
+.theme-minimal .schedule-title,
+.theme-minimal .schedule-table,
+.theme-minimal .schedule-table th,
+.theme-minimal .schedule-table td,
+.theme-minimal .class-cell,
+.theme-minimal .time-slot {
+    color: #2c3e50 !important;
+}
+
+.theme-dark,
+.theme-dark .schedule-title,
+.theme-dark .schedule-table,
+.theme-dark .schedule-table th,
+.theme-dark .schedule-table td,
+.theme-dark .class-cell,
+.theme-dark .time-slot {
+    color: #2c3e50 !important;
+}
+
+.theme-blue,
+.theme-blue .schedule-title,
+.theme-blue .schedule-table,
+.theme-blue .schedule-table th,
+.theme-blue .schedule-table td,
+.theme-blue .class-cell,
+.theme-blue .time-slot {
+    color: #3498db !important;
+}
+
+.theme-green,
+.theme-green .schedule-title,
+.theme-green .schedule-table,
+.theme-green .schedule-table th,
+.theme-green .schedule-table td,
+.theme-green .class-cell,
+.theme-green .time-slot {
+    color: #27ae60 !important;
+}
+
+.theme-purple,
+.theme-purple .schedule-title,
+.theme-purple .schedule-table,
+.theme-purple .schedule-table th,
+.theme-purple .schedule-table td,
+.theme-purple .class-cell,
+.theme-purple .time-slot {
+    color: #9b59b6 !important;
 }
 
 /* Responsive Design */

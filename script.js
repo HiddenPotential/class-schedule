@@ -601,8 +601,8 @@ class ScheduleApp {
     getThemeTextColor(theme) {
         const themeColors = {
             'default': [44, 62, 80],
-            'classic': [44, 62, 80],
-            'modern': [52, 73, 94],
+            'classic': [139, 69, 19],
+            'modern': [70, 130, 180],
             'vibrant': [155, 89, 182],
             'nature': [39, 174, 96],
             'sunset': [230, 126, 34]

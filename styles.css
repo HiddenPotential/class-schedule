@@ -503,7 +503,7 @@ body {
 .theme-classic .schedule-table td,
 .theme-classic .class-cell,
 .theme-classic .time-slot {
-    color: #2c3e50 !important;
+    color: #8b4513 !important;
 }
 
 .theme-modern,
@@ -513,7 +513,7 @@ body {
 .theme-modern .schedule-table td,
 .theme-modern .class-cell,
 .theme-modern .time-slot {
-    color: #34495e !important;
+    color: #4682b4 !important;
 }
 
 .theme-vibrant,
@@ -574,7 +574,7 @@ body {
 [data-theme="classic"] .schedule-table td,
 [data-theme="classic"] .class-cell,
 [data-theme="classic"] .time-slot {
-    color: #2c3e50 !important;
+    color: #8b4513 !important;
 }
 
 [data-theme="modern"],
@@ -584,7 +584,7 @@ body {
 [data-theme="modern"] .schedule-table td,
 [data-theme="modern"] .class-cell,
 [data-theme="modern"] .time-slot {
-    color: #34495e !important;
+    color: #4682b4 !important;
 }
 
 [data-theme="vibrant"],

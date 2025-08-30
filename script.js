@@ -84,12 +84,31 @@ class ScheduleApp {
             this.removeRow();
         });
         
-        // Cell editing enhancements
-        document.querySelectorAll('.class-cell').forEach(cell => {
-            cell.addEventListener('focus', this.handleCellFocus);
-            cell.addEventListener('blur', this.handleCellBlur);
-            cell.addEventListener('input', this.handleCellInput);
-        });
+        // Cell editing enhancements using event delegation
+        document.addEventListener('focus', (e) => {
+            if (e.target.classList.contains('class-cell')) {
+                this.handleCellFocus(e);
+            }
+        }, true);
+        
+        document.addEventListener('blur', (e) => {
+            if (e.target.classList.contains('class-cell')) {
+                this.handleCellBlur(e);
+            }
+        }, true);
+        
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('class-cell')) {
+                this.handleCellInput(e);
+            }
+        }, true);
+        
+        // Use event delegation for paste events on all contenteditable elements
+        document.addEventListener('paste', (e) => {
+            if (e.target.contentEditable === 'true') {
+                this.handleCellPaste(e);
+            }
+        }, true);
     }
     
     setupPlaceholders() {
@@ -214,6 +233,33 @@ class ScheduleApp {
         } else {
             cell.classList.add('empty');
         }
+    }
+    
+    handleCellPaste(event) {
+        // Prevent default paste behavior
+        event.preventDefault();
+        
+        // Get plain text from clipboard
+        const paste = (event.clipboardData || window.clipboardData).getData('text/plain');
+        
+        // Insert plain text only
+        if (document.queryCommandSupported('insertText')) {
+            document.execCommand('insertText', false, paste);
+        } else {
+            // Fallback for browsers that don't support insertText
+            const selection = window.getSelection();
+            if (selection.rangeCount) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(paste));
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+        
+        // Trigger input event to update cell state
+        event.target.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
     generatePDF() {
@@ -501,6 +547,7 @@ class ScheduleApp {
         const newHeader = document.createElement('th');
         newHeader.contentEditable = 'true';
         newHeader.textContent = `Day ${headerRow.children.length}`;
+        // Event listeners are now handled by event delegation
         headerRow.appendChild(newHeader);
         
         // Add cells to each body row
@@ -509,9 +556,7 @@ class ScheduleApp {
             newCell.contentEditable = 'true';
             newCell.className = 'class-cell';
             newCell.setAttribute('data-placeholder', 'Click to add class');
-            newCell.addEventListener('focus', this.handleCellFocus);
-            newCell.addEventListener('blur', this.handleCellBlur);
-            newCell.addEventListener('input', this.handleCellInput);
+            // Event listeners are now handled by event delegation
             row.appendChild(newCell);
         });
         
@@ -559,6 +604,7 @@ class ScheduleApp {
         timeCell.className = 'time-slot';
         timeCell.contentEditable = 'true';
         timeCell.textContent = nextTime;
+        // Event listeners are now handled by event delegation
         newRow.appendChild(timeCell);
         
         // Add class cells for each day column
@@ -567,9 +613,7 @@ class ScheduleApp {
             classCell.contentEditable = 'true';
             classCell.className = 'class-cell';
             classCell.setAttribute('data-placeholder', 'Click to add class');
-            classCell.addEventListener('focus', this.handleCellFocus);
-            classCell.addEventListener('blur', this.handleCellBlur);
-            classCell.addEventListener('input', this.handleCellInput);
+            // Event listeners are now handled by event delegation
             newRow.appendChild(classCell);
         }
         

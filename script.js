@@ -149,11 +149,17 @@ class ScheduleApp {
         }
         
         this.currentTheme = themeName;
+        
+        // Trigger autosave
+        setTimeout(saveToLocalStorage, 100);
     }
     
     applyFont(fontFamily) {
         this.table.style.fontFamily = fontFamily;
         this.currentFont = fontFamily;
+        
+        // Trigger autosave
+        setTimeout(saveToLocalStorage, 100);
     }
     
     applyFontSize(size) {
@@ -163,6 +169,9 @@ class ScheduleApp {
         // Add new font size class
         this.canvas.classList.add(`font-${size}`);
         this.currentFontSize = size;
+        
+        // Trigger autosave
+        setTimeout(saveToLocalStorage, 100);
     }
     
     handleBackgroundUpload(event) {
@@ -233,6 +242,9 @@ class ScheduleApp {
         } else {
             cell.classList.add('empty');
         }
+        
+        // Trigger autosave with debounce
+        setTimeout(saveToLocalStorage, 500);
     }
     
     handleCellPaste(event) {
@@ -260,6 +272,9 @@ class ScheduleApp {
         
         // Trigger input event to update cell state
         event.target.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Trigger autosave after paste
+        setTimeout(saveToLocalStorage, 500);
     }
     
     generatePDF() {
@@ -786,55 +801,143 @@ document.addEventListener('keydown', (e) => {
 
 // Add auto-save functionality to localStorage
 function saveToLocalStorage() {
+    console.log('🔄 saveToLocalStorage called');
+    
+    // Show visual indicator
+    showSaveIndicator();
+    
     const tableData = {};
-    document.querySelectorAll('.class-cell').forEach((cell, index) => {
-        tableData[index] = cell.textContent;
+    const cells = document.querySelectorAll('.class-cell');
+    console.log(`📊 Found ${cells.length} cells to save`);
+    
+    cells.forEach((cell, index) => {
+        tableData[index] = cell.textContent || '';
     });
+    
+    // Also save title
+    const title = document.getElementById('schedule-title');
+    const titleText = title ? title.textContent : 'Class Schedule';
     
     const appState = {
         tableData,
+        title: titleText,
         theme: document.querySelector('.theme-option.active')?.dataset.theme || 'classic',
-        fontFamily: document.getElementById('font-family').value,
-        fontSize: document.getElementById('font-size').value
+        fontFamily: document.getElementById('font-family')?.value || 'Arial, sans-serif',
+        fontSize: document.getElementById('font-size')?.value || 'medium',
+        timestamp: new Date().toISOString()
     };
     
-    localStorage.setItem('scheduleAppState', JSON.stringify(appState));
+    console.log('💾 Saving state:', appState);
+    try {
+        localStorage.setItem('scheduleAppState', JSON.stringify(appState));
+        console.log('✅ State saved successfully at', new Date().toLocaleTimeString());
+        return true;
+    } catch (error) {
+        console.error('❌ Error saving to localStorage:', error);
+        return false;
+    }
+}
+
+function showSaveIndicator() {
+    // Create or update save indicator
+    let indicator = document.getElementById('save-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'save-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        `;
+        document.body.appendChild(indicator);
+    }
+    
+    indicator.textContent = '💾 Saved!';
+    indicator.style.opacity = '1';
+    
+    // Hide after 2 seconds
+    setTimeout(() => {
+        indicator.style.opacity = '0';
+    }, 2000);
 }
 
 function loadFromLocalStorage() {
+    console.log('📂 loadFromLocalStorage called');
     const saved = localStorage.getItem('scheduleAppState');
+    console.log('💽 Saved data from localStorage:', saved ? 'Found data' : 'No data');
+    
     if (saved) {
         try {
             const appState = JSON.parse(saved);
+            console.log('📋 Parsed state from:', appState.timestamp || 'unknown time');
+            console.log('📊 State contains:', Object.keys(appState));
+            
+            // Restore title
+            if (appState.title) {
+                const titleElement = document.getElementById('schedule-title');
+                if (titleElement) {
+                    titleElement.textContent = appState.title;
+                    console.log('📝 Title restored:', appState.title);
+                }
+            }
             
             // Restore table data
             if (appState.tableData) {
-                document.querySelectorAll('.class-cell').forEach((cell, index) => {
+                const cells = document.querySelectorAll('.class-cell');
+                console.log(`🔄 Restoring data to ${cells.length} cells`);
+                
+                cells.forEach((cell, index) => {
                     if (appState.tableData[index]) {
                         cell.textContent = appState.tableData[index];
                         cell.classList.remove('empty');
                     }
                 });
+                console.log('✅ Table data restored');
             }
             
             // Restore theme
             if (appState.theme) {
-                document.querySelector(`[data-theme="${appState.theme}"]`)?.click();
+                const themeButton = document.querySelector(`[data-theme="${appState.theme}"]`);
+                if (themeButton) {
+                    themeButton.click();
+                    console.log('🎨 Theme restored:', appState.theme);
+                } else {
+                    console.warn('⚠️ Theme button not found for:', appState.theme);
+                }
             }
             
             // Restore font settings
             if (appState.fontFamily) {
-                document.getElementById('font-family').value = appState.fontFamily;
-                document.getElementById('font-family').dispatchEvent(new Event('change'));
+                const fontSelect = document.getElementById('font-family');
+                if (fontSelect) {
+                    fontSelect.value = appState.fontFamily;
+                    fontSelect.dispatchEvent(new Event('change'));
+                    console.log('🔤 Font family restored:', appState.fontFamily);
+                }
             }
             
             if (appState.fontSize) {
-                document.getElementById('font-size').value = appState.fontSize;
-                document.getElementById('font-size').dispatchEvent(new Event('change'));
+                const sizeSelect = document.getElementById('font-size');
+                if (sizeSelect) {
+                    sizeSelect.value = appState.fontSize;
+                    sizeSelect.dispatchEvent(new Event('change'));
+                    console.log('📏 Font size restored:', appState.fontSize);
+                }
             }
+            
+            console.log('🎉 Load completed successfully!');
         } catch (e) {
-            console.warn('Could not load saved state:', e);
+            console.error('❌ Could not load saved state:', e);
         }
+    } else {
+        console.log('📭 No saved state found - starting fresh');
     }
 }
 
@@ -847,6 +950,61 @@ document.addEventListener('change', saveToLocalStorage);
 
 // Load saved state on page load
 window.addEventListener('load', loadFromLocalStorage);
+
+// Add manual test function for debugging
+window.testAutosave = function() {
+    console.log('=== Manual Autosave Test ===');
+    saveToLocalStorage();
+    console.log('=== Manual Load Test ===');
+    loadFromLocalStorage();
+    console.log('=== Test Complete ===');
+};
+
+// Add manual save button for testing
+setTimeout(() => {
+    const controlPanel = document.querySelector('.control-panel');
+    if (controlPanel) {
+        const testButton = document.createElement('button');
+        testButton.textContent = '🧪 Test Save/Load';
+        testButton.style.cssText = `
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        `;
+        testButton.onclick = () => {
+            console.log('🧪 Manual test triggered');
+            testAutosave();
+        };
+        controlPanel.appendChild(testButton);
+        console.log('🧪 Test button added to control panel');
+    }
+}, 1000);
+
+// Log when page loads
+console.log('Class Schedule App loaded. Type testAutosave() in console to test saving/loading.');
+
+// Test localStorage availability immediately
+try {
+    localStorage.setItem('test', 'test');
+    localStorage.removeItem('test');
+    console.log('✅ localStorage is available and working');
+} catch (error) {
+    console.error('❌ localStorage is not available:', error);
+}
+
+// Test if we can find cells
+setTimeout(() => {
+    const cells = document.querySelectorAll('.class-cell');
+    console.log(`Found ${cells.length} editable cells`);
+    if (cells.length === 0) {
+        console.warn('⚠️ No .class-cell elements found - this might be why autosave isn\'t working');
+    }
+}, 1000);
 
 // Add beforeunload warning if there's unsaved content
 window.addEventListener('beforeunload', (e) => {

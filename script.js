@@ -223,6 +223,9 @@ class ScheduleApp {
         
         // Show feedback message
         this.showMessage('Custom color applied!', 'success');
+        
+        // Trigger autosave
+        setTimeout(saveToLocalStorage, 100);
     }
     
     handleCellFocus(event) {
@@ -769,7 +772,7 @@ class ScheduleApp {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ScheduleApp();
+    window.scheduleApp = new ScheduleApp();
 });
 
 // Add some utility functions for better user experience
@@ -818,10 +821,16 @@ function saveToLocalStorage() {
     const title = document.getElementById('schedule-title');
     const titleText = title ? title.textContent : 'Class Schedule';
     
+    // Get the app instance to access customColor
+    const app = window.scheduleApp;
+    const activeTheme = document.querySelector('.theme-option.active');
+    const currentTheme = activeTheme ? activeTheme.dataset.theme : (app && app.customColor ? 'custom' : 'classic');
+    
     const appState = {
         tableData,
         title: titleText,
-        theme: document.querySelector('.theme-option.active')?.dataset.theme || 'classic',
+        theme: currentTheme,
+        customColor: app ? app.customColor : null,
         fontFamily: document.getElementById('font-family')?.value || 'Arial, sans-serif',
         fontSize: document.getElementById('font-size')?.value || 'medium',
         timestamp: new Date().toISOString()
@@ -839,33 +848,8 @@ function saveToLocalStorage() {
 }
 
 function showSaveIndicator() {
-    // Create or update save indicator
-    let indicator = document.getElementById('save-indicator');
-    if (!indicator) {
-        indicator = document.createElement('div');
-        indicator.id = 'save-indicator';
-        indicator.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            z-index: 1000;
-            transition: opacity 0.3s;
-        `;
-        document.body.appendChild(indicator);
-    }
-    
-    indicator.textContent = '💾 Saved!';
-    indicator.style.opacity = '1';
-    
-    // Hide after 2 seconds
-    setTimeout(() => {
-        indicator.style.opacity = '0';
-    }, 2000);
+    // Save indicator disabled - no popup will be shown
+    return;
 }
 
 function loadFromLocalStorage() {
@@ -902,14 +886,26 @@ function loadFromLocalStorage() {
                 console.log('✅ Table data restored');
             }
             
-            // Restore theme
+            // Restore theme and custom color
             if (appState.theme) {
-                const themeButton = document.querySelector(`[data-theme="${appState.theme}"]`);
-                if (themeButton) {
-                    themeButton.click();
-                    console.log('🎨 Theme restored:', appState.theme);
+                if (appState.theme === 'custom' && appState.customColor) {
+                    // Restore custom color
+                    const colorPicker = document.getElementById('custom-color-picker');
+                    const app = window.scheduleApp;
+                    if (colorPicker && app) {
+                        colorPicker.value = appState.customColor;
+                        app.customColor = appState.customColor;
+                        app.applyTheme('custom');
+                        console.log('🎨 Custom color restored:', appState.customColor);
+                    }
                 } else {
-                    console.warn('⚠️ Theme button not found for:', appState.theme);
+                    const themeButton = document.querySelector(`[data-theme="${appState.theme}"]`);
+                    if (themeButton) {
+                        themeButton.click();
+                        console.log('🎨 Theme restored:', appState.theme);
+                    } else {
+                        console.warn('⚠️ Theme button not found for:', appState.theme);
+                    }
                 }
             }
             
@@ -960,30 +956,7 @@ window.testAutosave = function() {
     console.log('=== Test Complete ===');
 };
 
-// Add manual save button for testing
-setTimeout(() => {
-    const controlPanel = document.querySelector('.control-panel');
-    if (controlPanel) {
-        const testButton = document.createElement('button');
-        testButton.textContent = '🧪 Test Save/Load';
-        testButton.style.cssText = `
-            background: #ff9800;
-            color: white;
-            border: none;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        `;
-        testButton.onclick = () => {
-            console.log('🧪 Manual test triggered');
-            testAutosave();
-        };
-        controlPanel.appendChild(testButton);
-        console.log('🧪 Test button added to control panel');
-    }
-}, 1000);
+// Test button removed
 
 // Log when page loads
 console.log('Class Schedule App loaded. Type testAutosave() in console to test saving/loading.');

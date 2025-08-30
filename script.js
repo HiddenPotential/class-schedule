@@ -213,21 +213,79 @@ class ScheduleApp {
         // Store the custom color
         this.customColor = customColor;
         
-        // Remove active class from all theme options
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.classList.remove('active');
-        });
-        
-        // Apply custom color to schedule text
-        this.applyTheme('custom');
-        
-        // Show feedback message
-        this.showMessage('Custom color applied!', 'success');
+        // Check if there's selected text
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0 && !selection.isCollapsed) {
+            // Apply color to selected text only
+            this.applyColorToSelection(customColor);
+            this.showMessage('Custom color applied to selected text!', 'success');
+        } else {
+            // Remove active class from all theme options
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // Apply custom color to entire schedule
+            this.applyTheme('custom');
+            this.showMessage('Custom color applied to entire schedule!', 'success');
+        }
         
         // Trigger autosave
         setTimeout(saveToLocalStorage, 100);
     }
-    
+
+    applyColorToSelection(color) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0 || selection.isCollapsed) {
+            return;
+        }
+
+        try {
+            // Get the selected range
+            const range = selection.getRangeAt(0);
+            
+            // Check if selection is within a contenteditable element
+            const container = range.commonAncestorContainer;
+            const editableElement = container.nodeType === Node.TEXT_NODE 
+                ? container.parentElement 
+                : container;
+            
+            if (!editableElement.closest('[contenteditable="true"]')) {
+                this.showMessage('Please select text within an editable cell', 'error');
+                return;
+            }
+
+            // Create a span element with the custom color
+            const span = document.createElement('span');
+            span.style.color = color;
+            span.style.fontWeight = 'inherit';
+            
+            try {
+                // Extract the selected content and wrap it in the colored span
+                const contents = range.extractContents();
+                span.appendChild(contents);
+                range.insertNode(span);
+                
+                // Clear the selection
+                selection.removeAllRanges();
+                
+                // Trigger input event to ensure autosave
+                const cell = editableElement.closest('.class-cell, .schedule-title, .time-slot');
+                if (cell) {
+                    cell.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                
+            } catch (error) {
+                console.error('Error applying color to selection:', error);
+                this.showMessage('Error applying color to selected text', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Selection error:', error);
+            this.showMessage('Error processing text selection', 'error');
+        }
+    }
+
     handleCellFocus(event) {
         event.target.classList.remove('empty');
     }
@@ -814,7 +872,11 @@ function saveToLocalStorage() {
     console.log(`📊 Found ${cells.length} cells to save`);
     
     cells.forEach((cell, index) => {
-        tableData[index] = cell.textContent || '';
+        // Save both text content and HTML to preserve formatting
+        tableData[index] = {
+            text: cell.textContent || '',
+            html: cell.innerHTML || ''
+        };
     });
     
     // Also save title
@@ -878,8 +940,19 @@ function loadFromLocalStorage() {
                 console.log(`🔄 Restoring data to ${cells.length} cells`);
                 
                 cells.forEach((cell, index) => {
-                    if (appState.tableData[index]) {
-                        cell.textContent = appState.tableData[index];
+                    const cellData = appState.tableData[index];
+                    if (cellData) {
+                        // Handle both old format (string) and new format (object)
+                        if (typeof cellData === 'string') {
+                            // Old format - just text
+                            cell.textContent = cellData;
+                        } else if (cellData.html) {
+                            // New format - restore HTML formatting
+                            cell.innerHTML = cellData.html;
+                        } else if (cellData.text) {
+                            // New format but no HTML - use text
+                            cell.textContent = cellData.text;
+                        }
                         cell.classList.remove('empty');
                     }
                 });

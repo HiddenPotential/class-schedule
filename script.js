@@ -62,9 +62,14 @@ class ScheduleApp {
             this.applyCustomColor();
         });
         
-        // PDF download
+        // Download PDF button
         document.getElementById('download-pdf').addEventListener('click', () => {
             this.generatePDF();
+        });
+        
+        // Print button
+        document.getElementById('print-schedule').addEventListener('click', () => {
+            this.printSchedule();
         });
         
         // Table structure controls
@@ -587,6 +592,148 @@ class ScheduleApp {
         }
     }
     
+    printSchedule() {
+        try {
+            // Add print styles to current document
+            this.addPrintStyles();
+            
+            // Hide non-essential elements
+            const elementsToHide = document.querySelectorAll('.control-panel, .product-header, button:not(.print-btn), .background-controls, .table-controls');
+            elementsToHide.forEach(el => el.style.display = 'none');
+            
+            // Trigger browser print
+            window.print();
+            
+            // Restore hidden elements after print
+            setTimeout(() => {
+                elementsToHide.forEach(el => el.style.display = '');
+            }, 1000);
+            
+
+            
+        } catch (error) {
+            console.error('Print failed:', error);
+            this.showMessage('Failed to open print dialog. Please try again.', 'error');
+        }
+    }
+    
+    addPrintStyles() {
+        // Remove existing print styles
+        const existingPrintStyle = document.getElementById('print-styles');
+        if (existingPrintStyle) {
+            existingPrintStyle.remove();
+        }
+        
+        // Add new print styles
+        const printStyles = document.createElement('style');
+        printStyles.id = 'print-styles';
+        printStyles.innerHTML = `
+            @media print {
+                @page {
+                    size: letter;
+                    margin: 0.5in;
+                }
+                
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                
+                html, body {
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                    background: white !important;
+                    font-size: 10pt;
+                }
+                
+                .app-container {
+                    width: 100% !important;
+                    max-width: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                
+                .schedule-canvas {
+                    width: 100% !important;
+                    max-width: none !important;
+                    height: auto !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                    margin: 0 !important;
+                    padding: 10px !important;
+                    page-break-inside: avoid;
+                    background: white !important;
+                }
+                
+                .schedule-table {
+                    width: 100% !important;
+                    height: auto !important;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                    font-size: 9pt !important;
+                    margin: 0;
+                    page-break-inside: avoid;
+                }
+                
+                .schedule-table th {
+                    border: 1px solid #333 !important;
+                    padding: 4px 3px !important;
+                    font-size: 9pt !important;
+                    line-height: 1.2 !important;
+                    font-weight: bold;
+                    text-align: center;
+                    vertical-align: middle;
+                    height: auto !important;
+                    background: #f0f0f0 !important;
+                }
+                
+                .schedule-table td {
+                    border: 1px solid #333 !important;
+                    padding: 3px 2px !important;
+                    font-size: 8pt !important;
+                    line-height: 1.1 !important;
+                    vertical-align: top;
+                    height: auto !important;
+                    word-wrap: break-word;
+                    overflow: visible;
+                }
+                
+                .schedule-title {
+                    text-align: center;
+                    margin: 0 0 15px 0;
+                    font-size: 16pt !important;
+                    font-weight: bold;
+                    page-break-after: avoid;
+                }
+                
+                /* Hide non-essential elements */
+                .control-panel,
+                .product-header,
+                button,
+                .background-controls,
+                .table-controls {
+                    display: none !important;
+                }
+                
+                /* Ensure no page breaks */
+                .schedule-canvas,
+                .schedule-table,
+                .schedule-table tbody,
+                .schedule-table tr {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+            }
+        `;
+        
+        document.head.appendChild(printStyles);
+    }
+                            
+
+    
     extractTableData() {
         const headers = [];
         const rows = [];
@@ -906,8 +1053,13 @@ document.addEventListener('drop', (e) => {
 
 // Add keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + Shift + P for print
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        document.getElementById('print-schedule').click();
+    }
     // Ctrl/Cmd + P for PDF download
-    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
         e.preventDefault();
         document.getElementById('download-pdf').click();
     }

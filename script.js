@@ -632,6 +632,13 @@ class ScheduleApp {
                 @page {
                     size: letter;
                     margin: 0.5in;
+                    /* Disable browser headers and footers */
+                    @top-left { content: none; }
+                    @top-center { content: none; }
+                    @top-right { content: none; }
+                    @bottom-left { content: none; }
+                    @bottom-center { content: none; }
+                    @bottom-right { content: none; }
                 }
                 
                 * {
@@ -699,6 +706,11 @@ class ScheduleApp {
                     height: auto !important;
                     word-wrap: break-word;
                     overflow: visible;
+                }
+                
+                /* Hide placeholder text when printing */
+                .class-cell:empty:before {
+                    display: none !important;
                 }
                 
                 .schedule-title {

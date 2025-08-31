@@ -312,22 +312,53 @@ class ScheduleApp {
         // Prevent default paste behavior
         event.preventDefault();
         
-        // Get plain text from clipboard
-        const paste = (event.clipboardData || window.clipboardData).getData('text/plain');
-        
-        // Insert plain text only
-        if (document.queryCommandSupported('insertText')) {
-            document.execCommand('insertText', false, paste);
-        } else {
-            // Fallback for browsers that don't support insertText
+        try {
+            const clipboardData = event.clipboardData || window.clipboardData;
+            
+            // Try multiple clipboard formats to preserve formatting
+            let htmlContent = clipboardData.getData('text/html');
+            let rtfContent = clipboardData.getData('text/rtf');
+            let plainText = clipboardData.getData('text/plain');
+            
+            console.log('Paste data:', { htmlContent, rtfContent, plainText });
+            
             const selection = window.getSelection();
             if (selection.rangeCount) {
                 const range = selection.getRangeAt(0);
                 range.deleteContents();
-                range.insertNode(document.createTextNode(paste));
+                
+                // Try to preserve formatting from HTML content
+                if (htmlContent && htmlContent.trim()) {
+                    // Clean and parse HTML content
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    
+                    // Filter and preserve only safe formatting
+                    const fragment = document.createDocumentFragment();
+                    this.processNodesForPaste(tempDiv, fragment);
+                    
+                    if (fragment.hasChildNodes()) {
+                        range.insertNode(fragment);
+                    } else {
+                        // Fallback to plain text if HTML processing failed
+                        range.insertNode(document.createTextNode(plainText || ''));
+                    }
+                } else {
+                    // No HTML content, use plain text
+                    range.insertNode(document.createTextNode(plainText || ''));
+                }
+                
+                // Move cursor to end of pasted content
                 range.collapse(false);
                 selection.removeAllRanges();
                 selection.addRange(range);
+            }
+        } catch (error) {
+            console.error('Paste error:', error);
+            // Fallback to plain text if anything fails
+            const plainText = (event.clipboardData || window.clipboardData).getData('text/plain');
+            if (document.queryCommandSupported('insertText')) {
+                document.execCommand('insertText', false, plainText);
             }
         }
         
@@ -336,6 +367,35 @@ class ScheduleApp {
         
         // Trigger autosave after paste
         setTimeout(saveToLocalStorage, 500);
+    }
+    
+    processNodesForPaste(sourceNode, targetFragment) {
+        for (let child of Array.from(sourceNode.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE) {
+                // Preserve text nodes
+                targetFragment.appendChild(document.createTextNode(child.textContent));
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+                // Handle specific elements that preserve formatting
+                if (child.tagName === 'SPAN' && child.style.color) {
+                    // Preserve colored spans
+                    const span = document.createElement('span');
+                    span.style.color = child.style.color;
+                    span.style.fontWeight = child.style.fontWeight || 'inherit';
+                    
+                    // Recursively process child nodes
+                    this.processNodesForPaste(child, span);
+                    targetFragment.appendChild(span);
+                } else if (['B', 'STRONG', 'I', 'EM', 'U'].includes(child.tagName)) {
+                    // Preserve basic formatting
+                    const formattedElement = document.createElement(child.tagName.toLowerCase());
+                    this.processNodesForPaste(child, formattedElement);
+                    targetFragment.appendChild(formattedElement);
+                } else {
+                    // For other elements, just extract the text content
+                    this.processNodesForPaste(child, targetFragment);
+                }
+            }
+        }
     }
     
     generatePDF() {
@@ -863,9 +923,6 @@ document.addEventListener('keydown', (e) => {
 // Add auto-save functionality to localStorage
 function saveToLocalStorage() {
     console.log('🔄 saveToLocalStorage called');
-    
-    // Show visual indicator
-    showSaveIndicator();
     
     const tableData = {};
     const cells = document.querySelectorAll('.class-cell');
